@@ -1,0 +1,30 @@
+
+host = "influx.mydomain.com"
+port = 8086
+database = "testing"
+measurement = "my_ruuvitags"
+ssl = true
+
+username = ""
+password = ""
+
+store_fields = ["temperature", 
+                "pressure",
+                "humidity",
+                "battery",
+                "movement_counter",
+                "tx_power",
+                "tagID"
+]
+
+[device-names]
+
+"E1:8A:12:DD:3E:62" = "Ruuvi 1"
+"DA:F5:8E:D4:01:49" = "Ruuvi 2"
+"F6:7A:E5:53:1B:22" = "Ruuvi 3"
+
+[locations]
+
+"Ruuvi 1" = "Room"
+"Ruuvi 2" = "Bedroom"
+"Ruuvi 3" = "Outside"
