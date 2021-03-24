@@ -59,7 +59,7 @@ Under `[locations]`, you can define a map from the device names given above, to 
 
 You need to run `export RUUVI_BLE_ADAPTER="Bleson"` to make the code use the Bleson library.
 
-To run the code, use `python ruuvi_influx.py actual_config.toml`. It should "just work", running forever, uploading data as it finds it. Press `ctrl-c` (possibly twice) to quit. 
+To run the code, use `python ruuvi_influx.py actual_config.toml`. It should "just work", running forever, uploading data as it finds it. Press `ctrl-c` (possibly twice) to quit.
 
 If it exits by itself soon after starting, your bluetooth stuff is probably broken.
 
