@@ -38,24 +38,30 @@ def connect_influxdb(config):
 def map_mac(config, mac):
     """ Map MAC address to device name from config, defaulting to MAC if not given.
     """
-    return config["device-names"].get(mac, mac) if "device-names" in config else mac
+    return config["device-names"].get(mac, None) if "device-names" in config else None
 
 
 def get_location(config, name):
-    if not "locations" in config:
-        return "unknown"
-    return config["locations"].get(name, "unknown")
+    if not "locations" in config or name is None:
+        return None
+    return config["locations"].get(name, None)
+
 
 def ruuvi_to_point(config, received_data):
     """ Format measurement JSON from RuuviTag into InfluxDB data point JSON.
     """
     mac = received_data[0]
-    deviceName = map_mac(config, mac)
-    
     payload = received_data[1]
     dataFormat = payload.get("data_format", None)
     
-    location = get_location(config, deviceName)
+    deviceName = map_mac(config, mac)
+    
+    tags = {
+        'mac' : mac,
+        'format' : dataFormat,
+        'device' : deviceName,
+        'loation' : get_location(config, deviceName)
+    }
 
     fields = {}
     for fieldName in config["store_fields"]:
@@ -64,12 +70,7 @@ def ruuvi_to_point(config, received_data):
 
     return {
         'measurement' : config["measurement"],
-        'tags' : {
-            'mac' : mac,
-            'device' : deviceName,
-            'format' : dataFormat,
-            'location' : location
-        },
+        'tags' : tags,
         'fields' : fields
     }
 
@@ -86,13 +87,11 @@ def ruuvi_callback(config, client, received_data):
 def main(filename):
     # Read and check config
     config = read_config(filename)
-    try:
-        assert check_config(config)
-    except AssertionError:
+    if not check_config(config):
         logging.error("Config file failed format check.")
         exit()
     
-    # Make InfluxDB client object
+    # Make InfluxDB client session
     client = connect_influxdb(config)
 
     # Make actual callback function
@@ -100,7 +99,8 @@ def main(filename):
         return ruuvi_callback(config, client, data)
 
     # Start listening
-    RuuviTagSensor.get_datas(callback)
+    mac_filter = config.get("mac_filter", [])
+    RuuviTagSensor.get_datas(callback, macs=mac_filter)
 
 
 if __name__ == "__main__":

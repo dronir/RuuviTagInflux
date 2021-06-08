@@ -34,7 +34,7 @@ I suggest you copy the example file `test_config.toml` into `actual_config.toml`
 
 The absolutely required config keys are:
 
-- `host`, the hostname of your InfluxDB server.
+- `host`, the hostname of your InfluxDB server. The port defaults to 8086.
 - `database`, the name of the database on your InfluxDB server.
 - `measurement`, the name of the measurement into which the data is saved.
 - `store_fields`, a list of variables that are stored.
@@ -45,9 +45,13 @@ The possible variable names are: `temperature`, `pressure`, `humidity`, `battery
 
 ### Additional configuration
 
+You can give and array called `mac_filter`, containing MAC addresses of RuuviTags. If it is non-empty, only the devices whose addresses are in the list are listened to. Otherwise every RuuviTag in the range gets stored.
+
+If your InfluxDB server is on a port different to the default 8086, you can change that by setting `port` to some integer value.
+
 If your InfluxDB server has SSL enabled, set `ssl = true` in the config.
 
-If your database has user authentication, set the username and password in the config file.
+If your database has user authentication, set the username and password in the config file. I suggest you create a new user with write-only access to the specific database you want to use with this script.
 
 In InfluxDB, the data points from each RuuviTag will get a tag named `mac` with the device's MAC address as the tag value. Additionally, you can define two mappings for more practical tags:
 
@@ -67,5 +71,4 @@ Making this run as a system service probably makes sense.
 
 ## TODO
 
-- Add a whitelist or blacklist functionality to enable or disable individual RuuviTags based on their MAC address. Currently the software uploads from every device it can find.
 - Add logging level to config.

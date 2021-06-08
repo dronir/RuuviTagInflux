@@ -17,6 +17,12 @@ store_fields = ["temperature",
                 "tagID"
 ]
 
+mac_filter = [
+   "E1:8A:12:DD:3E:62",
+   "DA:F5:8E:D4:01:49",
+   "F6:7A:E5:53:1B:22" 
+]
+
 [device-names]
 
 "E1:8A:12:DD:3E:62" = "Ruuvi 1"
