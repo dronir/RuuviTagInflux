@@ -8,6 +8,12 @@ from ruuvitag_sensor.ruuvi import RuuviTagSensor
 from sys import exit, argv
 import logging
 
+LOG_LEVEL = {
+    "DEBUG" : logging.DEBUG,
+    "INFO" : logging.INFO,
+    "WARNING" : logging.WARNING,
+    "ERROR" : logging.ERROR
+}
 
 def read_config(filename):
     """ Read config from TOML file.
@@ -42,7 +48,7 @@ def map_mac(config, mac):
 
 
 def get_location(config, name):
-    if not "locations" in config or name is None:
+    if not "locations" in config.keys() or name is None:
         return None
     return config["locations"].get(name, None)
 
@@ -90,6 +96,9 @@ def main(filename):
     if not check_config(config):
         logging.error("Config file failed format check.")
         exit()
+    
+    level = config.get("log_level", "WARNING")
+    logging.basicConfig(level=LOG_LEVEL[level])
     
     # Make InfluxDB client session
     client = connect_influxdb(config)
