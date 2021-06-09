@@ -66,7 +66,7 @@ def ruuvi_to_point(config, received_data):
         'mac' : mac,
         'format' : dataFormat,
         'device' : deviceName,
-        'loation' : get_location(config, deviceName)
+        'location' : get_location(config, deviceName)
     }
 
     fields = {}
