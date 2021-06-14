@@ -7,6 +7,9 @@ from influxdb import InfluxDBClient
 from ruuvitag_sensor.ruuvi import RuuviTagSensor
 from sys import exit, argv
 import logging
+from pprint import pformat
+
+logger = logging.getLogger(__name__)
 
 LOG_LEVEL = {
     "DEBUG" : logging.DEBUG,
@@ -86,6 +89,7 @@ def ruuvi_callback(config, client, received_data):
     """ Callback for ruuvi get_datas(). Format the JSON and send to Influx.
     """
     json_body = ruuvi_to_point(config, received_data)
+    logger.info(f"Trying to upload: {pformat(json_body)}")
     client.write_points([json_body])
 
 
@@ -94,12 +98,15 @@ def main(filename):
     # Read and check config
     config = read_config(filename)
     if not check_config(config):
-        logging.error("Config file failed format check.")
+        logger.critical("Config file failed format check.")
         exit()
     
     level = config.get("log_level", "WARNING")
-    logging.basicConfig(level=LOG_LEVEL[level])
     
+    logger.setLevel(level=LOG_LEVEL[level])
+    logger.debug("Started with the following config:")
+    logger.debug(pformat(config))
+
     # Make InfluxDB client session
     client = connect_influxdb(config)
 
