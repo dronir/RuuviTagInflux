@@ -12,11 +12,12 @@ from pprint import pformat
 logger = logging.getLogger(__name__)
 
 LOG_LEVEL = {
-    "DEBUG" : logging.DEBUG,
-    "INFO" : logging.INFO,
-    "WARNING" : logging.WARNING,
-    "ERROR" : logging.ERROR
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR
 }
+
 
 def read_config(filename):
     """ Read config from TOML file.
@@ -24,25 +25,28 @@ def read_config(filename):
     with open(filename, 'r') as f:
         return toml.loads(f.read())
 
+
 def check_config(config):
     """ Check that a config has the required keys.
     """
     return ("host" in config
-    and "database" in config
-    and "measurement" in config
-    and "store_fields" in config)
+            and "database" in config
+            and "measurement" in config
+            and "store_fields" in config)
+
 
 def connect_influxdb(config):
     """ Return an InfluxDB client object from given config.
     """
-    client = InfluxDBClient(host = config["host"],
-                            port = config.get("port", 8086),
-                            username = config.get("username", ""),
-                            password = config.get("password",""),
-                            ssl = config.get("ssl", False),
-                            verify_ssl = config.get("ssl", False))
+    client = InfluxDBClient(host=config["host"],
+                            port=config.get("port", 8086),
+                            username=config.get("username", ""),
+                            password=config.get("password", ""),
+                            ssl=config.get("ssl", False),
+                            verify_ssl=config.get("ssl", False))
     client.switch_database(config["database"])
     return client
+
 
 def map_mac(config, mac):
     """ Map MAC address to device name from config, defaulting to MAC if not given.
@@ -51,7 +55,7 @@ def map_mac(config, mac):
 
 
 def get_location(config, name):
-    if not "locations" in config.keys() or name is None:
+    if "locations" not in config.keys() or name is None:
         return None
     return config["locations"].get(name, None)
 
@@ -61,28 +65,26 @@ def ruuvi_to_point(config, received_data):
     """
     mac = received_data[0]
     payload = received_data[1]
-    dataFormat = payload.get("data_format", None)
-    
-    deviceName = map_mac(config, mac)
+    data_format = payload.get("data_format", None)
+    device_name = map_mac(config, mac)
     
     tags = {
-        'mac' : mac,
-        'format' : dataFormat,
-        'device' : deviceName,
-        'location' : get_location(config, deviceName)
+        'mac': mac,
+        'format': data_format,
+        'device': device_name,
+        'location': get_location(config, device_name)
     }
 
     fields = {}
-    for fieldName in config["store_fields"]:
-        if fieldName in payload:
-            fields[fieldName] = payload[fieldName]
+    for field_name in config["store_fields"]:
+        if field_name in payload:
+            fields[field_name] = payload[field_name]
 
     return {
-        'measurement' : config["measurement"],
-        'tags' : tags,
-        'fields' : fields
+        'measurement': config["measurement"],
+        'tags': tags,
+        'fields': fields
     }
-
 
 
 def ruuvi_callback(config, client, received_data):
@@ -93,9 +95,7 @@ def ruuvi_callback(config, client, received_data):
     client.write_points([json_body])
 
 
-
 def main(filename):
-    # Read and check config
     config = read_config(filename)
     if not check_config(config):
         logger.critical("Config file failed format check.")
@@ -107,15 +107,11 @@ def main(filename):
     logger.debug("Started with the following config:")
     logger.debug(pformat(config))
 
-    # Make InfluxDB client session
+    mac_filter = config.get("mac_filter", [])
     client = connect_influxdb(config)
-
-    # Make actual callback function
     def callback(data):
         return ruuvi_callback(config, client, data)
 
-    # Start listening
-    mac_filter = config.get("mac_filter", [])
     RuuviTagSensor.get_datas(callback, macs=mac_filter)
 
 
