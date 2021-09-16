@@ -28,9 +28,6 @@ Install Pipenv with `python -m pip install pipenv`
 
 Install the other requirements with `pipenv install`.
 
-Install the latest version of the Bleson library with 
-.
-
 
 ## Configuration
 
