@@ -20,15 +20,17 @@ You need a recent version of Python (3.8 probably works, but I have only tested 
 you need to compile it yourself, since the version in the `apt` repository is too old. Google "raspberry pi python 3.9
 install" for instructions. It's not hard, but it takes a few minutes.
 
-I strongly suggest using a Python virtualenv. If you don't know what that means, I suggest you go and learn it now.
-
 ### This script and required Python libraries
 
 Clone this git repository.
 
-Install the latest version of the Bleson library with `pip install git+https://github.com/TheCellule/python-bleson`.
+Install Pipenv with `python -m pip install pipenv`
 
-Install the other requirements with `pip install -r requirements.txt`.
+Install the other requirements with `pipenv install`.
+
+Install the latest version of the Bleson library with 
+.
+
 
 ## Configuration
 
@@ -77,10 +79,10 @@ when displaying with Grafana.
 
 You need to run `export RUUVI_BLE_ADAPTER="Bleson"` to make the code use the Bleson library.
 
-To run the code, use `python ruuvi_influx.py actual_config.toml`. It should "just work", running forever, uploading data
-as it finds it. Press `ctrl-c` (possibly twice) to quit.
+To run the code, use `pipenv run python ruuvi_influx.py actual_config.toml`.
+It should "just work", running forever, uploading data as it finds it. Press `ctrl-c` (possibly twice) to quit.
 
-If it exits by itself soon after starting, your bluetooth stuff is probably broken.
+If the program exits itself soon after starting, your bluetooth stuff is probably broken.
 
 Making this run as a system service probably makes sense.
 
