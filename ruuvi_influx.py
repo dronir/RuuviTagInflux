@@ -10,6 +10,7 @@ import logging
 from pprint import pformat
 
 from typing import Dict, List, Optional, Any, MutableMapping
+from pydantic import BaseModel, constr, Field
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,21 @@ LOG_LEVEL = {
 }
 
 JsonObject = MutableMapping[str, Any]
+
+
+class Config(BaseModel):
+    host: str
+    port: Optional[int]
+    database: str
+    measurement: str
+    store_fields: List[str]
+    ssl: Optional[bool]
+    log_level: Optional[str]
+    username: Optional[str]
+    password: Optional[str]
+    mac_filter: Optional[List[str]]
+    device_names: Optional[Dict[str, str]] = Field(..., alias="device-names")
+    locations: Optional[Dict[str, str]]
 
 
 def read_config(filename: str) -> JsonObject:

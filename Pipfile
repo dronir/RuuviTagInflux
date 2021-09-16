@@ -8,6 +8,7 @@ toml = "*"
 influxdb = "*"
 ruuvitag-sensor = "*"
 bleson = "*"
+pydantic = "*"
 
 [dev-packages]
 pytest = "*"
