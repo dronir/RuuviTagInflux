@@ -10,7 +10,7 @@ import logging
 from pprint import pformat
 
 from typing import Dict, List, Optional, Any, MutableMapping
-from pydantic import BaseModel, constr, Field
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -21,17 +21,15 @@ LOG_LEVEL = {
     "ERROR": logging.ERROR
 }
 
-JsonObject = MutableMapping[str, Any]
-
 
 class Config(BaseModel):
     host: str
-    port: Optional[int]
+    port = 8086
     database: str
     measurement: str
     store_fields: List[str]
-    ssl: Optional[bool]
-    log_level: Optional[str]
+    ssl = False
+    log_level = "WARNING"
     username: Optional[str]
     password: Optional[str]
     mac_filter: Optional[List[str]]
@@ -39,56 +37,45 @@ class Config(BaseModel):
     locations: Optional[Dict[str, str]]
 
 
-def read_config(filename: str) -> JsonObject:
-    """ Read config from TOML file.
+def read_config(filename: str) -> Config:
+    """ Parse Config object from TOML file.
     """
     with open(filename, 'r') as f:
-        return toml.loads(f.read())
+        return Config.parse_obj(toml.loads(f.read()))
 
 
-def check_config(config: JsonObject) -> bool:
-    """ Check that a config has the required keys.
-    """
-    return ("host" in config
-            and "database" in config
-            and "measurement" in config
-            and "store_fields" in config)
-
-
-def connect_influxdb(config: JsonObject) -> InfluxDBClient:
+def connect_influxdb(config: Config) -> InfluxDBClient:
     """ Return an InfluxDB client object from given config.
     """
-    client = InfluxDBClient(host=config["host"],
-                            port=config.get("port", 8086),
-                            username=config.get("username", ""),
-                            password=config.get("password", ""),
-                            ssl=config.get("ssl", False),
-                            verify_ssl=config.get("ssl", False))
-    client.switch_database(config["database"])
+    client = InfluxDBClient(host=config.host,
+                            port=config.port,
+                            username=config.username,
+                            password=config.username,
+                            ssl=config.ssl,
+                            verify_ssl=config.ssl)
+    client.switch_database(config.database)
     return client
 
 
-def map_mac(config: JsonObject, mac: str) -> Optional[str]:
-    """ Map MAC address to device name from config, defaulting to MAC if not given.
+def map_mac(config: Config, mac: str) -> Optional[str]:
+    """Maybe get a device name based on MAC address.
     """
-    return (config["device-names"].get(mac, None)
-            if "device-names" in config else None)
+    return (None if config.device_names is None
+            else config.device_names.get(mac, None))
 
 
-def get_location(config: JsonObject, name: Optional[str]) -> Optional[str]:
-    """Get location of a tag from the config, based on its name.
-    Returns None if a name isn't found.
+def get_location(config: Config, name: Optional[str]) -> Optional[str]:
+    """Maybe get a named location of a tag from the config.
     """
-    if "locations" not in config.keys() or name is None:
-        return None
-    return config["locations"].get(name, None)
+    return (None if (config.locations is None or name is None)
+            else config.locations.get(name, None))
 
 
-def ruuvi_to_point(config: JsonObject, received_data: List) -> JsonObject:
-    """ Format measurement JSON from RuuviTag into InfluxDB data point JSON.
+def ruuvi_to_point(config: Config, received_data: List) -> Dict[str, Any]:
+    """ Format measurement JSON from RuuviTag into InfluxDB data point JSON-like.
     """
-    mac = received_data[0]
-    payload: JsonObject = received_data[1]
+    mac: str = received_data[0]
+    payload: MutableMapping[str, Any] = received_data[1]
     data_format = payload.get("data_format", None)
     device_name = map_mac(config, mac)
 
@@ -100,18 +87,18 @@ def ruuvi_to_point(config: JsonObject, received_data: List) -> JsonObject:
     }
 
     fields = {}
-    for field_name in config["store_fields"]:
+    for field_name in config.store_fields:
         if field_name in payload:
             fields[field_name] = payload[field_name]
 
     return {
-        'measurement': config["measurement"],
+        'measurement': config.measurement,
         'tags': tags,
         'fields': fields
     }
 
 
-def ruuvi_callback(config: JsonObject,
+def ruuvi_callback(config: Config,
                    client: InfluxDBClient,
                    received_data: List) -> None:
     """ Callback for ruuvi get_datas(). Format the JSON and send to Influx.
@@ -123,23 +110,17 @@ def ruuvi_callback(config: JsonObject,
 
 def main(filename: str):
     config = read_config(filename)
-    if not check_config(config):
-        logger.critical("Config file failed format check.")
-        exit()
 
-    level = config.get("log_level", "WARNING")
-
-    logger.setLevel(level=LOG_LEVEL[level])
+    logger.setLevel(level=LOG_LEVEL[config.log_level])
     logger.debug("Started with the following config:")
-    logger.debug(pformat(config))
+    logger.debug(str(config))
 
-    mac_filter = config.get("mac_filter", [])
     client = connect_influxdb(config)
 
-    def callback(data: List):
+    def callback(data: List) -> None:
         return ruuvi_callback(config, client, data)
 
-    RuuviTagSensor.get_datas(callback, macs=mac_filter)
+    RuuviTagSensor.get_datas(callback, macs=config.mac_filter)
 
 
 if __name__ == "__main__":
