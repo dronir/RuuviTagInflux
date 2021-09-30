@@ -12,6 +12,7 @@ from pprint import pformat
 from typing import Dict, List, Optional, Any, MutableMapping
 from pydantic import BaseModel, Field
 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 LOG_LEVEL = {
