@@ -51,7 +51,7 @@ def connect_influxdb(config: Config) -> InfluxDBClient:
     client = InfluxDBClient(host=config.host,
                             port=config.port,
                             username=config.username,
-                            password=config.username,
+                            password=config.password,
                             ssl=config.ssl,
                             verify_ssl=config.ssl)
     client.switch_database(config.database)
