@@ -74,10 +74,10 @@ when displaying with Grafana.
 
 ## Usage
 
-You need to run `export RUUVI_BLE_ADAPTER="Bleson"` to make the code use the Bleson library.
-
 To run the code, use `pipenv run python ruuvi_influx.py actual_config.toml`.
 It should "just work", running forever, uploading data as it finds it. Press `ctrl-c` (possibly twice) to quit.
+
+Outside of the Pipenv environment, you may need to set the environmental variable `RUUVI_BLE_ADAPTER="bleson"`.
 
 If the program exits itself soon after starting, your bluetooth stuff is probably broken.
 
