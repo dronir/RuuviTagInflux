@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "ruuvi-influx"
+version = "0.1.0"
+description = "Ruuvitag-InfluxDB uploader for my Raspberry Pi"
+authors = ["Olli Wilkman <olli.wilkman@iki.fi>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+ruuvitag-sensor = "^1.2.0"
+influxdb = "^5.3.1"
+toml = "^0.10.2"
+pydantic = "^1.8.2"
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.910"
+black = "^21.12b0"
+flake8 = "^4.0.1"
+pytest = "^6.2.5"
+types-toml = "^0.10.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
