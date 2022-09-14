@@ -13,12 +13,10 @@ Assuming you've taken a bluetooth-capable Raspberry Pi with the latest command l
 configured it enough that it's safely connected to your network, 
 and ran `sudo apt-get update && sudo apt-get -y upgrade`.
 
-First install some stuff: `sudo apt-get -y install git pi-bluetooth bluez blueman`.
+First install some stuff: `sudo apt-get -y install git pi-bluetooth bluez python3-dev python3-pip`.
 
-[TODO: check exactly which of those bluetooth libraries are needed and remove rest.]
-
-You need a recent version of Python (3.8 probably works, but I have only tested on 3.9). 
-Unfortunately on Raspbian you need to compile it yourself, since the version in the `apt` repository is too old. 
+You need a recent version of Python (3.8 probably works, but I have only tested on 3.9).
+On older versions of Raspbian you need to compile it yourself, since the version in the `apt` repository is too old. 
 Google "raspberry pi python 3.9 install" for instructions. It's not hard, but it takes a few minutes.
 
 After installing Python, upgrade Pip with `sudo python3 -m pip install --upgrade pip`.
@@ -30,7 +28,7 @@ Then install Poetry with `sudo python3 -m pip install poetry`.
 
 Clone this git repository.
 
-Install this package and its requirements with `poetry install --no-dev` in the repo directory.
+Install this package and its requirements with `poetry install --only main` in the repo directory.
 
 
 ## Configuration
