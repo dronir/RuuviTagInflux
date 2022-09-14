@@ -45,7 +45,7 @@ def read_config(filename: str) -> Config:
         return Config.parse_obj(toml.loads(f.read()))
 
 
-def connect_influxdb(config: Config) -> InfluxDBClient:
+def influxdb_client(config: Config) -> InfluxDBClient:
     """Return an InfluxDB client object from given config."""
     client = InfluxDBClient(
         host=config.host,
@@ -98,7 +98,7 @@ def ruuvi_to_point(config: Config, received_data: List) -> Dict[str, Any]:
 def ruuvi_callback(config: Config, client: InfluxDBClient, received_data: List) -> None:
     """Callback for ruuvi get_datas(). Format the JSON and send to Influx."""
     json_body = ruuvi_to_point(config, received_data)
-    logger.info(f"Trying to upload: {pformat(json_body)}")
+    logger.debug(f"Trying to upload: {pformat(json_body)}")
     client.write_points([json_body])
 
 
@@ -109,7 +109,7 @@ def main(filename: str):
     logger.debug("Started with the following config:")
     logger.debug(str(config))
 
-    client = connect_influxdb(config)
+    client = influxdb_client(config)
 
     def callback(data: List) -> None:
         return ruuvi_callback(config, client, data)

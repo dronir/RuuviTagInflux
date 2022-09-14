@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ruuvi-influx"
-version = "0.1.0"
+version = "0.2.0"
 description = "Ruuvitag-InfluxDB uploader for my Raspberry Pi"
 authors = ["Olli Wilkman <olli.wilkman@iki.fi>"]
 license = "MIT"
